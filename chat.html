@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interactive Chatbot</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #e4e9f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #6e7f93, #b1c2d6);
+      flex-direction: column; /* Ensures elements stack vertically */
+    }
+    .chat-container {
+      width: 350px;
+      height: 500px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .logo-container {
+      text-align: center;
+      padding: 20px 0;
+      width: 100%; /* Ensure it takes full width of the screen */
+    }
+    .logo-container img {
+      width: 50px; /* Adjust the size of the logo */
+    }
+    .header {
+      background-color: #4CAF50;
+      padding: 15px;
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-size: 16px;
+      border-bottom: 2px solid #ddd;
+    }
+    .messages {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .message {
+      max-width: 80%;
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      line-height: 1.4;
+      word-wrap: break-word;
+    }
+    .user {
+      background-color: #d1f7c4;
+      align-self: flex-end;
+      border-radius: 20px 20px 0 20px;
+      color: #333;
+    }
+    .bot {
+      background-color: #f1f1f1;
+      align-self: flex-start;
+      border-radius: 20px 20px 20px 0;
+      color: #333;
+    }
+    .input-container {
+      display: flex;
+      padding: 10px;
+      background-color: #f8f8f8;
+      border-top: 1px solid #ddd;
+    }
+    input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 30px;
+      outline: none;
+      margin-right: 10px;
+    }
+    input[type="text"]:focus {
+      border-color: #4CAF50;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo-container">
+    <!-- Place the base64-encoded image here -->
+    <div class="logo-container">
+    <img src="https://raw.githubusercontent.com/yiluansong/demystif-AI/main/logo.png" alt="Logo"  style="width: 200px; height: auto;">
+    </div>
+  </div>
+
+  <div class="chat-container">
+    <div class="header">
+      <span>demystif-AI</span>
+    </div>
+    <div class="messages" id="chat-box">
+      <!-- Messages will be shown here -->
+    </div>
+    <div class="input-container">
+      <input type="text" id="user-message" placeholder="Ask me anything..." />
+      <button onclick="sendMessage()">&#8594;</button>
+    </div>
+  </div>
+
+  <script>
+    function addMessage(sender, message) {
+      const chatBox = document.getElementById("chat-box");
+      const messageElement = document.createElement("div");
+      messageElement.classList.add("message", sender);
+      messageElement.innerText = message;
+      chatBox.appendChild(messageElement);
+      chatBox.scrollTop = chatBox.scrollHeight; // Scroll to the latest message
+    }
+
+    function sendMessage() {
+      const userMessage = document.getElementById("user-message").value;
+      if (userMessage.trim() !== "") {
+        addMessage("user", userMessage); // Add user message to chat
+        document.getElementById("user-message").value = ""; // Clear input field
+
+        // Call Google Apps Script backend to get bot's response
+        google.script.run.withSuccessHandler(function(response) {
+          addMessage("bot", response.response); // Add bot response to chat
+        }).getBotResponse(userMessage);
+      }
+    }
+  </script>
+</body>
+</html>
