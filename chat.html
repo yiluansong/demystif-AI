@@ -15,11 +15,13 @@
       align-items: center;
       height: 100vh;
       background: linear-gradient(135deg, #6e7f93, #b1c2d6);
-      flex-direction: column; /* Ensures elements stack vertically */
+      flex-direction: column;
+      overflow: hidden; /* Prevent scrolling */
     }
     .chat-container {
-      width: 350px;
-      height: 500px;
+      width: 100%;
+      max-width: 1280px; /* Limit width on large screens */
+      height: 90vh; /* Take up 90% of the viewport height */
       background: white;
       border-radius: 10px;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
@@ -30,10 +32,11 @@
     .logo-container {
       text-align: center;
       padding: 20px 0;
-      width: 100%; /* Ensure it takes full width of the screen */
+      width: 100%;
     }
     .logo-container img {
-      width: 50px; /* Adjust the size of the logo */
+      width: 100px; /* Adjust the size of the logo */
+      height: auto;
     }
     .header {
       background-color: #4CAF50;
@@ -103,19 +106,25 @@
     button:hover {
       background-color: #45a049;
     }
+    @media (max-width: 600px) {
+      .chat-container {
+        width: 100%;
+        height: 100vh; /* Make it take full height on mobile */
+      }
+      .logo-container img {
+        width: 80px; /* Adjust the logo size on mobile */
+      }
+    }
   </style>
 </head>
 <body>
   <div class="logo-container">
-    <!-- Place the base64-encoded image here -->
-    <div class="logo-container">
-    <img src="https://raw.githubusercontent.com/yiluansong/demystif-AI/main/logo.png" alt="Logo"  style="width: 200px; height: auto;">
-    </div>
+    <img src="https://raw.githubusercontent.com/yiluansong/demystif-AI/main/logo.png" alt="Logo">
   </div>
 
   <div class="chat-container">
     <div class="header">
-      <span>demystif-AI</span>
+      <span>Chatbot Assistant</span>
     </div>
     <div class="messages" id="chat-box">
       <!-- Messages will be shown here -->
