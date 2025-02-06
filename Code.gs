@@ -1,38 +1,52 @@
 function doGet() {
+  var properties = PropertiesService.getUserProperties();
+  
+  // Clear the conversation context when the page is loaded
+  properties.deleteProperty('conversationContext');
+
   return HtmlService.createHtmlOutputFromFile('chat'); // 'chat' refers to your HTML file
 }
 
 function getBotResponse(userMessage) {
+  var properties = PropertiesService.getUserProperties();
+
+  // Retrieve the current context (conversation memory)
+  var currentContext = properties.getProperty('conversationContext') || '';  // If there's no context, start with an empty string
+
   // Get the data from your Google Sheet
   var sheet = SpreadsheetApp.openById("1Ni-VGYiVmLUiu1a-d2CXM2nh8jSPOfHow9VXeCek21w").getActiveSheet();
   var data = sheet.getDataRange().getValues();  
 
-  // Prepare the entire sheet's data as context
-  var context = '';
+  // Prepare the sheet's data as context (this can be limited to only relevant information)
+  var sheetContext = '';
   for (var i = 1; i < data.length; i++) {
-    // Loop through each row and concatenate all columns as context
-    context += 'Row ' + (i + 1) + ': ';
+    sheetContext += 'Row ' + (i + 1) + ': ';
     for (var j = 0; j < data[i].length; j++) {
-      context += data[i][j] + ' '; // Add each cell's content
+      sheetContext += data[i][j] + ' ';
     }
-    context += '\n';  // Separate rows
+    sheetContext += '\n'; // Separate rows
   }
 
-  // Pass the entire sheet context along with the user's message to ChatGPT
-  var aiResponse = getAIResponse(userMessage, context);
+  // Combine the user's message with the context from the sheet
+  var newContext = currentContext + '\n' + 'User: ' + userMessage + '\nBot:';
+
+  // Send the combined context and user message to get the AI's response
+  var aiResponse = getAIResponse(userMessage, sheetContext + newContext);
+
+  // Save the updated context for the next request
+  properties.setProperty('conversationContext', newContext + ' ' + aiResponse);
+
   return { response: aiResponse };
 }
 
 function getAIResponse(userMessage, context) {
-  // Your OpenAI API key (use your actual API key)
-  var apiKey = "<Your-API-Key>"; // Replace with your actual API key
+  var apiKey = "<your-api-key>"; // Replace with your actual API key
 
-  // Set up the API request payload
   var prompt = "You are a helpful assistant. Below is the data from the user's Google Sheet:\n" + context +
                "User has asked: " + userMessage + "\n\nYour response:";
 
   var payload = {
-    "model": "gpt-3.5-turbo",  // Use the appropriate model
+    "model": "gpt-3.5-turbo", 
     "messages": [
       {"role": "system", "content": "You are a helpful assistant that can respond based on the provided data."},
       {"role": "user", "content": prompt}
@@ -40,7 +54,6 @@ function getAIResponse(userMessage, context) {
     "max_tokens": 150
   };
 
-  // Make the HTTP request to the OpenAI API
   var options = {
     "method": "POST",
     "headers": {
@@ -50,10 +63,8 @@ function getAIResponse(userMessage, context) {
     "payload": JSON.stringify(payload)
   };
 
-  // Send the request and parse the response
   var response = UrlFetchApp.fetch("https://api.openai.com/v1/chat/completions", options);
   var jsonResponse = JSON.parse(response.getContentText());
 
-  // Extract and return the AI's response
   return jsonResponse.choices[0].message.content;
 }
